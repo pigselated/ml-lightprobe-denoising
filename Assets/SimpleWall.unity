@@ -74,10 +74,10 @@ LightmapSettings:
     m_MixedBakeMode: 0
     m_BakeBackend: 1
     m_PVRSampling: 1
-    m_PVRDirectSampleCount: 16
-    m_PVRSampleCount: 16
+    m_PVRDirectSampleCount: 128
+    m_PVRSampleCount: 128
     m_PVRBounces: 2
-    m_PVREnvironmentSampleCount: 16
+    m_PVREnvironmentSampleCount: 128
     m_PVREnvironmentReferencePointCount: 2048
     m_PVRFilteringMode: 2
     m_PVRDenoiserTypeDirect: 0
@@ -95,8 +95,8 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaIndirect: 2
     m_PVRFilteringAtrousPositionSigmaAO: 1
     m_ExportTrainingData: 1
-    m_TrainingDataDestination: TrainingData_16_NONE_NONE
-    m_LightProbeSampleCountMultiplier: 4
+    m_TrainingDataDestination: TrainingData_128
+    m_LightProbeSampleCountMultiplier: 1
   m_LightingDataAsset: {fileID: 112000000, guid: 85df7ded737cc074e80515b395d36920,
     type: 2}
   m_UseShadowmask: 0
@@ -225,7 +225,7 @@ GameObject:
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
   m_Layer: 0
-  m_Name: Camera 0
+  m_Name: Camera _screenshot_0
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
