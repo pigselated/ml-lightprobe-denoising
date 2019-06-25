@@ -76,6 +76,8 @@ public class TrainingDataGeneratorWindow : EditorWindow
     int scale = 4;
     int sampleCount = 8;
     bool isBaking = false;
+    bool overrideFiltering = true;
+    bool overrideDenoising = true;
 
     [MenuItem("Tools/Training Data Generator")]
     public static void ShowWindow()
@@ -151,7 +153,15 @@ public class TrainingDataGeneratorWindow : EditorWindow
             sampleCount = EditorGUILayout.IntField("Sample count", sampleCount);
             sampleCount = Mathf.Max(ToNearest(sampleCount), 8);
         }
-
+        EditorGUILayout.Space();
+        using (new EditorGUI.DisabledScope(isBaking))
+        {
+            overrideDenoising = EditorGUILayout.Toggle("Override denoising", overrideDenoising);
+        }
+        using (new EditorGUI.DisabledScope(isBaking))
+        {
+            overrideFiltering = EditorGUILayout.Toggle("Override filtering", overrideFiltering);
+        }
         EditorGUILayout.Space();
 
         bool bake = false;
@@ -191,13 +201,18 @@ public class TrainingDataGeneratorWindow : EditorWindow
 
                 LightmapEditorSettings.filteringMode = LightmapEditorSettings.FilterMode.Advanced;
 
-                LightmapEditorSettings.denoiserTypeDirect = LightmapEditorSettings.DenoiserType.None;
-                LightmapEditorSettings.denoiserTypeIndirect = LightmapEditorSettings.DenoiserType.None;
-                LightmapEditorSettings.denoiserTypeAO = LightmapEditorSettings.DenoiserType.None;
-
-                LightmapEditorSettings.filterTypeDirect = LightmapEditorSettings.FilterType.None;
-                LightmapEditorSettings.filterTypeIndirect = LightmapEditorSettings.FilterType.None;
-                LightmapEditorSettings.filterTypeAO = LightmapEditorSettings.FilterType.None;
+                if (overrideDenoising)
+                {
+                    LightmapEditorSettings.denoiserTypeDirect = LightmapEditorSettings.DenoiserType.None;
+                    LightmapEditorSettings.denoiserTypeIndirect = LightmapEditorSettings.DenoiserType.None;
+                    LightmapEditorSettings.denoiserTypeAO = LightmapEditorSettings.DenoiserType.None;
+                }
+                if (overrideFiltering)
+                {
+                    LightmapEditorSettings.filterTypeDirect = LightmapEditorSettings.FilterType.None;
+                    LightmapEditorSettings.filterTypeIndirect = LightmapEditorSettings.FilterType.None;
+                    LightmapEditorSettings.filterTypeAO = LightmapEditorSettings.FilterType.None;
+                }
         
                 Debug.ClearDeveloperConsole();
                 Lightmapping.BakeAsync();
