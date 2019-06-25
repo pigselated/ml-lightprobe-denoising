@@ -101,7 +101,7 @@ public class TrainingDataGeneratorWindow : EditorWindow
         data.sampleCount = sampleCount;
         data.coefficients = LightmapSettings.lightProbes.bakedProbes;
         data.positions = LightmapSettings.lightProbes.positions;
-        string dataPath = string.Format("LPTrainingData_{0}.json", sampleCount);
+        string dataPath = string.Format("{0}/LPTrainingData_{1}.json", path, sampleCount);
         if (System.IO.Directory.Exists(dataPath))
         {
             System.IO.Directory.Delete(dataPath, true);
