@@ -61,7 +61,7 @@ public class TrainingDataGeneratorWindow : EditorWindow
 
     int resWidth = 1920;
     int resHeight = 1080;
-    int scale = 2;
+    int scale = 4;
     int sampleCount = 8;
     bool isBaking = false;
 
