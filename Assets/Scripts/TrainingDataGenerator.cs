@@ -25,20 +25,32 @@ public class Bake : MonoBehaviour
 public class LightProbeTrainingData
 {
     public string description;
-
     public int probeCount;
-
     public int sampleCount;
 
-    // N x 3 x 9
+    // Notation:
+    // http://www.ppsloan.org/publications/StupidSH36.pdf
+    // http://graphics.stanford.edu/papers/envmap/envmap.pdf
+    //
+    //                       [L00:  DC]
+    //            [L1-1:  y] [L10:   z] [L11:   x]
+    // [L2-2: xy] [L2-1: yz] [L20:  zz] [L21:  xz]  [L22:  xx - yy]
+    //
+    // 9 coefficients for R, G and B ordered:
+    // {  L00, L1-1,  L10,  L11, L2-2, L2-1,  L20,  L21,  L22,  // red   channel
+    //    L00, L1-1,  L10,  L11, L2-2, L2-1,  L20,  L21,  L22,  // blue  channel
+    //    L00, L1-1,  L10,  L11, L2-2, L2-1,  L20,  L21,  L22 } // green channel
     public SphericalHarmonicsL2[] coefficients;
-
-    // N x 3
     public Vector3[] positions;
 }
 
 public class TrainingDataGeneratorWindow : EditorWindow
 {
+    int ToNearest(int x)
+    {
+        return (int)Mathf.Pow(2.0f, Mathf.Round(Mathf.Log(x) / Mathf.Log(2.0f)));
+    }
+
     void TakeHiResShot(string filename, Camera camera, int width, int height)
     {
         RenderTexture rt = new RenderTexture(width, height, 24);
@@ -65,7 +77,6 @@ public class TrainingDataGeneratorWindow : EditorWindow
     int sampleCount = 8;
     bool isBaking = false;
 
-    // Add menu item named "My Window" to the Window menu
     [MenuItem("Tools/Training Data Generator")]
     public static void ShowWindow()
     {
@@ -138,8 +149,7 @@ public class TrainingDataGeneratorWindow : EditorWindow
         using (new EditorGUI.DisabledScope(isBaking))
         {
             sampleCount = EditorGUILayout.IntField("Sample count", sampleCount);
-
-            
+            sampleCount = Mathf.Max(ToNearest(sampleCount), 8);
         }
 
         EditorGUILayout.Space();
