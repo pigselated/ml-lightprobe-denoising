@@ -26,6 +26,8 @@ public class LightProbeTrainingData
 {
     public string description;
 
+    public int probeCount;
+
     public int sampleCount;
 
     // N x 3 x 9
@@ -95,6 +97,7 @@ public class TrainingDataGeneratorWindow : EditorWindow
         // Export lightprobe data
         LightProbeTrainingData data = new LightProbeTrainingData();
         data.description = "The layout is as follows, 9 red coefficients followed by green and blue coefficients. Coefficient 0 is the DC band. This is followed by band 1 and band 2.";
+        data.probeCount = LightmapSettings.lightProbes.count;
         data.sampleCount = sampleCount;
         data.coefficients = LightmapSettings.lightProbes.bakedProbes;
         data.positions = LightmapSettings.lightProbes.positions;
