@@ -45,10 +45,6 @@ public class TrainingDataGeneratorWindow : EditorWindow
     int resHeight = 1080;
     int scale = 2;
     int sampleCount = 128;
-    bool useOIDN = false;
-    bool useOptix = false;
-    bool useGauss = false;
-    bool useAtrous = false;
     bool isBaking = false;
 
     // Add menu item named "My Window" to the Window menu
@@ -79,21 +75,20 @@ public class TrainingDataGeneratorWindow : EditorWindow
                 TakeHiResShot(strPath, camera, resWidth * scale, resHeight * scale);
             }
         }
-
         isBaking = false;
         RemoveLightmapperCallbacks();
     }
 
     void AddLightmapperCallbacks()
     {
-        Lightmapping.started += Started;
-        Lightmapping.completed += Completed;
+        Lightmapping.bakeStarted += Started;
+        Lightmapping.bakeCompleted += Completed;
     }
 
     void RemoveLightmapperCallbacks()
     {
-        Lightmapping.started -= Started;
-        Lightmapping.completed -= Completed;
+        Lightmapping.bakeStarted -= Started;
+        Lightmapping.bakeCompleted -= Completed;
     }
     void OnInspectorUpdate()
     {
@@ -111,25 +106,7 @@ public class TrainingDataGeneratorWindow : EditorWindow
         {
             sampleCount = EditorGUILayout.IntField("Sample count", sampleCount);
 
-            using (new EditorGUI.DisabledScope(useOptix))
-            {
-                useOIDN = EditorGUILayout.Toggle("Use OIDN", useOIDN);
-            }
-
-            using (new EditorGUI.DisabledScope(useOIDN))
-            {
-                useOptix = EditorGUILayout.Toggle("Use Optix", useOptix);
-            }
-
-            using (new EditorGUI.DisabledScope(useAtrous))
-            {
-                useGauss = EditorGUILayout.Toggle("Use GAUSSIAN", useGauss);
-            }
-
-            using (new EditorGUI.DisabledScope(useGauss))
-            {
-                useAtrous = EditorGUILayout.Toggle("Use A-TROUS", useAtrous);
-            }
+            
         }
 
         EditorGUILayout.Space();
@@ -146,7 +123,7 @@ public class TrainingDataGeneratorWindow : EditorWindow
             isBaking = true;
             AddLightmapperCallbacks();
 
-            path = string.Format("TrainingData_{0}_{1}_{2}", sampleCount, (useOIDN ? "OIDN" : (useOptix ? "OPTIX" : "NONE")), (useGauss ? "GAUSS" : (useAtrous ? "ATROUS" : "NONE")));
+            path = string.Format("TrainingData_{0}", sampleCount);
             if (System.IO.Directory.Exists(path))
             {
                 System.IO.Directory.Delete(path, true);
@@ -159,59 +136,26 @@ public class TrainingDataGeneratorWindow : EditorWindow
             }
             else
             {
+                EditorSettings.useLegacyProbeSampleCount = false;
+
+
                 LightmapEditorSettings.trainingDataDestination = path;
                 LightmapEditorSettings.exportTrainingData = true;
                 LightmapEditorSettings.directSampleCount = sampleCount;
                 LightmapEditorSettings.indirectSampleCount = sampleCount;
                 LightmapEditorSettings.environmentSampleCount = sampleCount;
+                LightmapEditorSettings.lightProbeSampleCountMultiplier = 1;
 
                 LightmapEditorSettings.filteringMode = LightmapEditorSettings.FilterMode.Advanced;
-                if (useOIDN)
-                {
-                    LightmapEditorSettings.denoiserTypeDirect = LightmapEditorSettings.DenoiserType.OpenImage;
-                    LightmapEditorSettings.denoiserTypeIndirect = LightmapEditorSettings.DenoiserType.OpenImage;
-                    LightmapEditorSettings.denoiserTypeAO = LightmapEditorSettings.DenoiserType.OpenImage;
-                }
-                else if (useOptix)
-                {
-                    LightmapEditorSettings.denoiserTypeDirect = LightmapEditorSettings.DenoiserType.Optix;
-                    LightmapEditorSettings.denoiserTypeIndirect = LightmapEditorSettings.DenoiserType.Optix;
-                    LightmapEditorSettings.denoiserTypeAO = LightmapEditorSettings.DenoiserType.Optix;
-                }
-                else
-                {
-                    LightmapEditorSettings.denoiserTypeDirect = LightmapEditorSettings.DenoiserType.None;
-                    LightmapEditorSettings.denoiserTypeIndirect = LightmapEditorSettings.DenoiserType.None;
-                    LightmapEditorSettings.denoiserTypeAO = LightmapEditorSettings.DenoiserType.None;
-                }
 
-                if (useGauss)
-                {
-                    LightmapEditorSettings.filterTypeDirect = LightmapEditorSettings.FilterType.Gaussian;
-                    LightmapEditorSettings.filterTypeIndirect = LightmapEditorSettings.FilterType.Gaussian;
-                    LightmapEditorSettings.filterTypeAO = LightmapEditorSettings.FilterType.Gaussian;
+                LightmapEditorSettings.denoiserTypeDirect = LightmapEditorSettings.DenoiserType.None;
+                LightmapEditorSettings.denoiserTypeIndirect = LightmapEditorSettings.DenoiserType.None;
+                LightmapEditorSettings.denoiserTypeAO = LightmapEditorSettings.DenoiserType.None;
 
-                    LightmapEditorSettings.filteringGaussRadiusDirect = 1;
-                    LightmapEditorSettings.filteringGaussRadiusIndirect = 5;
-                    LightmapEditorSettings.filteringGaussRadiusAO = 2;
-                }
-                else if (useAtrous)
-                {
-                    LightmapEditorSettings.filterTypeDirect = LightmapEditorSettings.FilterType.ATrous;
-                    LightmapEditorSettings.filterTypeIndirect = LightmapEditorSettings.FilterType.ATrous;
-                    LightmapEditorSettings.filterTypeAO = LightmapEditorSettings.FilterType.ATrous;
-
-                    LightmapEditorSettings.filteringAtrousPositionSigmaDirect = 0.5F;
-                    LightmapEditorSettings.filteringAtrousPositionSigmaIndirect = 2.0F;
-                    LightmapEditorSettings.filteringAtrousPositionSigmaAO = 1.0F;
-                }
-                else
-                {
-                    LightmapEditorSettings.filterTypeDirect = LightmapEditorSettings.FilterType.None;
-                    LightmapEditorSettings.filterTypeIndirect = LightmapEditorSettings.FilterType.None;
-                    LightmapEditorSettings.filterTypeAO = LightmapEditorSettings.FilterType.None;
-                }
-
+                LightmapEditorSettings.filterTypeDirect = LightmapEditorSettings.FilterType.None;
+                LightmapEditorSettings.filterTypeIndirect = LightmapEditorSettings.FilterType.None;
+                LightmapEditorSettings.filterTypeAO = LightmapEditorSettings.FilterType.None;
+        
                 Debug.ClearDeveloperConsole();
                 Lightmapping.BakeAsync();
             }
