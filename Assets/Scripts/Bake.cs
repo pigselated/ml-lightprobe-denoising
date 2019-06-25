@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
+using System.IO;
 
 [ExecuteInEditMode]
 public class Bake : MonoBehaviour
@@ -17,6 +19,20 @@ public class Bake : MonoBehaviour
     {
         
     }
+}
+
+[System.Serializable]
+public class LightProbeTrainingData
+{
+    public string description;
+
+    public int sampleCount;
+
+    // N x 3 x 9
+    public SphericalHarmonicsL2[] coefficients;
+
+    // N x 3
+    public Vector3[] positions;
 }
 
 public class TrainingDataGeneratorWindow : EditorWindow
@@ -44,7 +60,7 @@ public class TrainingDataGeneratorWindow : EditorWindow
     int resWidth = 1920;
     int resHeight = 1080;
     int scale = 2;
-    int sampleCount = 128;
+    int sampleCount = 8;
     bool isBaking = false;
 
     // Add menu item named "My Window" to the Window menu
@@ -55,7 +71,7 @@ public class TrainingDataGeneratorWindow : EditorWindow
         EditorWindow editorWindow = EditorWindow.GetWindow(typeof(TrainingDataGeneratorWindow));
         editorWindow.autoRepaintOnSceneChange = true;
         editorWindow.Show();
-        editorWindow.title = "Training Data Generator";
+        editorWindow.titleContent.text = "Training Data Generator";
     }
     void Started()
     {
@@ -75,6 +91,20 @@ public class TrainingDataGeneratorWindow : EditorWindow
                 TakeHiResShot(strPath, camera, resWidth * scale, resHeight * scale);
             }
         }
+
+        // Export lightprobe data
+        LightProbeTrainingData data = new LightProbeTrainingData();
+        data.description = "The layout is as follows, 9 red coefficients followed by green and blue coefficients. Coefficient 0 is the DC band. This is followed by band 1 and band 2.";
+        data.sampleCount = sampleCount;
+        data.coefficients = LightmapSettings.lightProbes.bakedProbes;
+        data.positions = LightmapSettings.lightProbes.positions;
+        string dataPath = string.Format("LPTrainingData_{0}.json", sampleCount);
+        if (System.IO.Directory.Exists(dataPath))
+        {
+            System.IO.Directory.Delete(dataPath, true);
+        }
+        File.WriteAllText(dataPath, JsonUtility.ToJson(data));
+
         isBaking = false;
         RemoveLightmapperCallbacks();
     }
